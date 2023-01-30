@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">CalendrierServeur</string>
+
+    <string-array name="days">
+        <item>Lundi</item>
+        <item>Mardi</item>
+        <item>Mercredi</item>
+        <item>Jeudi</item>
+        <item>Vendredi</item>
+        <item>Samedi</item>
+        <item>Dimanche</item>
+    </string-array>
+
+</resources>

@@ -1,20 +1,24 @@
 package com.example.calendrierserveur;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.owlike.genson.Genson;
 
 import java.io.BufferedInputStream;
@@ -90,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
                             LinearLayout dimanche = createLayout("Dimanche");
 
                             //On ajoute les jours au layout principal
-                            principal.addView(lundi);principal.addView(mardi);principal.addView(mercredi);principal.addView(jeudi);principal.addView(vendredi);principal.addView(samedi);principal.addView(dimanche);
                             principal.addView(boutonAjouter);
+                            principal.addView(lundi);principal.addView(mardi);principal.addView(mercredi);principal.addView(jeudi);principal.addView(vendredi);principal.addView(samedi);principal.addView(dimanche);
 
                             //On affiche les rendez vous
                             for (int i = 0; i<nbRdv; i++) {
@@ -108,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
                                 //Et un bouton pour la modification
                                 Button button = new Button(activity);
                                 button.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                                button.setText("Modifier");
                                 button.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
@@ -184,29 +189,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Button creationBouton(){
-        Button boutonRond = new Button(this);
-        boutonRond.setLayoutParams(new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT));
-        boutonRond.getLayoutParams().width = 50;
-        boutonRond.getLayoutParams().height = 50;
-        ((RelativeLayout.LayoutParams) boutonRond.getLayoutParams()).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        ((RelativeLayout.LayoutParams) boutonRond.getLayoutParams()).addRule(RelativeLayout.ALIGN_PARENT_END, RelativeLayout.TRUE);
-        boutonRond.setBackgroundResource(R.color.black);
-        boutonRond.setText("+");
-        boutonRond.setTextColor(getResources().getColor(R.color.white));
-        boutonRond.setTextSize(20);
-        boutonRond.setElevation(4);
-        boutonRond.setBackgroundTintList(getResources().getColorStateList(R.color.black));
-        boutonRond.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        boutonRond.setPadding(16,16,16,16);
-
-        GradientDrawable drawable = new GradientDrawable();
-        drawable.setShape(GradientDrawable.OVAL);
-        drawable.setColor(getResources().getColor(R.color.black));
-        boutonRond.setBackground(drawable);
-
-        return boutonRond;
+        Button button = new Button(this);
+        button.setId(R.id.confirm_button);
+        button.setLayoutParams(new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+        button.setText("  Ajouter un rendez-vous  ");
+        //button.setTextColor(Color.parseColor("#FFFFFF"));
+        //button.setBackgroundColor(Color.parseColor("#4444FF"));
+        return button;
     }
 
     private void update(int id) {

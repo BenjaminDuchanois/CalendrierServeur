@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 HttpURLConnection urlConnection = null;
                 try {
-                    URL url = new URL("http://192.168.43.85:8081/CalendrierServeur/rest/rdv/getNbRdv");
+                    URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/getNbRdv");
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("GET");
                     InputStream in = new BufferedInputStream( urlConnection.getInputStream());
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
                     //On charge les données dans un tableau
                     for (int i = 0; i<nbRdv; i++) {
-                        url = new URL("http://192.168.43.85:8081/CalendrierServeur/rest/rdv/get/" + i);
+                        url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/get/" + i);
                         urlConnection = (HttpURLConnection) url.openConnection();
                         urlConnection.setRequestMethod("GET");
                         in = new BufferedInputStream(urlConnection.getInputStream());

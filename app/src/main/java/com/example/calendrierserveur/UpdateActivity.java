@@ -63,7 +63,7 @@ public class UpdateActivity extends AppCompatActivity {
                 id = Integer.parseInt(intent.getStringExtra("id"));
                 HttpURLConnection urlConnection = null;
                 try {
-                    URL url = new URL("http://192.168.56.1:8081/CalendrierServeur/rest/rdv/get/" + id);
+                    URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/get/" + id);
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("GET");
                     InputStream in = new BufferedInputStream( urlConnection.getInputStream());
@@ -121,7 +121,7 @@ public class UpdateActivity extends AppCompatActivity {
 
                 HttpURLConnection urlConnection = null;
                 try{
-                    URL url = new URL("http://192.168.56.1:8081/CalendrierServeur/rest/rdv/update");
+                    URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/update");
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("PUT");
                     urlConnection.setDoOutput(true);

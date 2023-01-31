@@ -70,7 +70,7 @@ public class AddActivity extends AppCompatActivity {
 
                     HttpURLConnection urlConnection = null;
                     try{
-                        URL url = new URL("http://192.168.43.85:8081/CalendrierServeur/rest/rdv/add");
+                        URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/add");
                         urlConnection = (HttpURLConnection) url.openConnection();
                         urlConnection.setRequestMethod("PUT");
                         urlConnection.setDoOutput(true);

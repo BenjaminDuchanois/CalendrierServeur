@@ -11,4 +11,7 @@
         <item>Dimanche</item>
     </string-array>
 
+    <string name="IP">http://10.1.24.74</string>
+
+
 </resources>

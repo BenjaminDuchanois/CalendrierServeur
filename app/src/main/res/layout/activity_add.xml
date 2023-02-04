@@ -64,8 +64,17 @@
             android:id="@+id/confirm_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/blue"
             android:onClick="boutonValider"
             android:text="Créer le rendez-vous" />
+
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/red"
+            android:onClick="boutonAnnuler"
+            android:text="Annuler" />
 
     </LinearLayout>
 

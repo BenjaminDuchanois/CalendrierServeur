@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Permet de retrouver l'activité facilement depuis les Thread
         this.activity = MainActivity.this;
     }
 
@@ -44,11 +45,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        //---- CONNEXION AU SERVEUR ----
         new Thread(new Runnable() {
             @Override
             public void run() {
                 HttpURLConnection urlConnection = null;
                 try {
+                    //On récupère le nombre de rdv stockés
                     URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/getNbRdv");
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("GET");
@@ -57,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                     final int nbRdv = new Genson().deserialize( scanner.nextLine(), int.class);
                     Log.i("Exchange-JSON", "Result == " + nbRdv);
 
-                    //On charge les données dans un tableau
+                    //On charge tous les rdv dans un tableau
                     for (int i = 0; i<nbRdv; i++) {
                         url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/get/" + i);
                         urlConnection = (HttpURLConnection) url.openConnection();
@@ -69,14 +72,17 @@ public class MainActivity extends AppCompatActivity {
                         listeRdv[i] = rendezVous;
                     }
 
-                    //On charge la vue
+                    //---- CHARGEMENT DE LA VUE ----
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            //On vide entièrement la vue avec le layout principal
                             LinearLayout principal = (LinearLayout) findViewById(R.id.layoutPrincipal);
                             principal.removeAllViews();
 
+                            //On ajoute le bouton d'ajout de Rdv
                             Button boutonAjouter = creationBouton();
+                            boutonAjouter.setText("  Ajouter un rendez-vous  ");
                             boutonAjouter.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
@@ -84,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             });
 
-                            //On définit les différents jours
+                            //On définit les différents jours en leur créant un layout chacun
                             LinearLayout lundi = createLayout("Lundi");
                             LinearLayout mardi = createLayout("Mardi");
                             LinearLayout mercredi = createLayout("Mercredi");
@@ -93,37 +99,17 @@ public class MainActivity extends AppCompatActivity {
                             LinearLayout samedi = createLayout("Samedi");
                             LinearLayout dimanche = createLayout("Dimanche");
 
-                            //On ajoute les jours au layout principal
+                            //On ajoute le bouton et les jours au layout principal
                             principal.addView(boutonAjouter);
                             principal.addView(lundi);principal.addView(mardi);principal.addView(mercredi);principal.addView(jeudi);principal.addView(vendredi);principal.addView(samedi);principal.addView(dimanche);
 
-                            //On affiche les rendez vous
+                            //On créer ensuite les layout de chaque rdv
                             for (int i = 0; i<nbRdv; i++) {
                                 final int currentId = i;
-                                //On crée pour chaque rdv un Layout
-                                LinearLayout linearLayout = new LinearLayout(activity);
-                                linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-                                linearLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                                //On crée un TextView
-                                TextView textView = new TextView(activity);
-                                textView.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-                                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-                                textView.setText(listeRdv[i].getHeure() + "h" + listeRdv[i].getMinute() + " : " + listeRdv[i].getTitre());
-                                //Et un bouton pour la modification
-                                Button button = new Button(activity);
-                                button.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                                button.setText("Modifier");
-                                button.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        update(listeRdv[currentId].getIdRdv());
-                                    }
-                                });
-                                //On ajoute le tout au layout
-                                linearLayout.addView(textView);
-                                linearLayout.addView(button);
 
-                                //On ajoute le rdv au jour qui correspond
+                                LinearLayout linearLayout = creationListeRdv(currentId);
+
+                                //On ajoute le rdv au jour qui lui correspond
                                 switch (listeRdv[i].getJour()){
                                     case 0: lundi.addView(linearLayout);
                                             break;
@@ -160,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Crée les layout pour les différents jours
     private LinearLayout createLayout(String nom){
+        //Layout vertical où on ajoutera les rdv
         LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -167,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
         ));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
+        //Layout horizontal pour le nom et de possibles ajouts
         LinearLayout layoutHorizontal = new LinearLayout(this);
         layoutHorizontal.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -174,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
         ));
         layoutHorizontal.setOrientation(LinearLayout.HORIZONTAL);
 
+        //Nom du jour
         TextView textView = new TextView(this);
         textView.setLayoutParams(new LinearLayout.LayoutParams(
                 0,
@@ -188,26 +177,60 @@ public class MainActivity extends AppCompatActivity {
         return linearLayout;
     }
 
+    //Crée les rendez-vous
+    private LinearLayout creationListeRdv(int currentId){
+        //On crée pour chaque rdv un Layout
+        LinearLayout linearLayout = new LinearLayout(activity);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        //On crée un TextView pour son titre
+        TextView textView = new TextView(activity);
+        textView.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        textView.setText(listeRdv[currentId].getHeure() + "h" + listeRdv[currentId].getMinute() + " : " + listeRdv[currentId].getTitre());
+        //Et un bouton pour la modification
+        Button button = creationBouton();
+        button.setText("Modifier");
+        //On assigne l'update au bouton concerné
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                update(listeRdv[currentId].getIdRdv());
+            }
+        });
+        //On ajoute le tout au layout
+        linearLayout.addView(textView);
+        linearLayout.addView(button);
+
+        return linearLayout;
+    }
+
+
+    //Permet de créer des bouton suivant notre style plus facilement
     private Button creationBouton(){
+        //On crée le bouton et ses paramètres de base
         Button button = new Button(this);
-        button.setId(R.id.confirm_button);
         button.setLayoutParams(new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
-        button.setText("  Ajouter un rendez-vous  ");
-        //button.setTextColor(Color.parseColor("#FFFFFF"));
-        //button.setBackgroundColor(Color.parseColor("#4444FF"));
+        //On lui ajoute nos couleurs perso
+        button.setBackgroundTintList(getColorStateList(R.color.blue));
+        button.setTextColor(getColor(R.color.white));
         return button;
     }
 
+    //Fonction pour les boutons "Modifier"
     private void update(int id) {
+        //Lance l'application UpdateActivity en lui précisant l'id du rdv à modifier
         Intent intent = new Intent(this, UpdateActivity.class);
         intent.putExtra("id",id + "");
         this.startActivity(intent);
     }
 
+    //Fonction pour le bouton "Ajouter un rdv"
     private void add() {
+        //Lance l'activité AddActivity
         Intent intent = new Intent(this, AddActivity.class);
         this.startActivity(intent);
     }

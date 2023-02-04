@@ -29,35 +29,48 @@ public class AddActivity extends AppCompatActivity {
     Spinner jour;
     TimePicker heure;
     Button boutonValider;
+    Button boutonRetour;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
 
+        //Initialisation des composants graphiques
         activity = AddActivity.this;
         titre = (EditText) this.findViewById(R.id.title_text);
         description = (EditText) this.findViewById(R.id.description_text);
         jour = (Spinner) this.findViewById(R.id.day_spinner);
         heure = (TimePicker) this.findViewById(R.id.time_picker);
+        boutonRetour = (Button) this.findViewById(R.id.cancel_button);
         boutonValider = (Button) this.findViewById(R.id.confirm_button);
+        //Lance la fonction d'ajout quand le bouton confirmer est cliqué
         boutonValider.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 add(view);
             }
         });
+        //Lance la fonction de retour quand le bouton annuler est cliqué (Revient à faire Retour)
+        boutonRetour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) { cancel(); }
+        });
+        //Permet de mettre le timePicker en format 24h
         heure.setIs24HourView(true);
     }
 
+    //Fonction d'ajout
     private void add(View view) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String nvTitre, nvDesc;
 
+                //Si tous les champs ont bien été précisés
                 if((!titre.getText().toString().equals("")) && (!description.getText().toString().equals(""))) {
+                    //Crée un nouveau RendezVous suivant les données entrées
                     RendezVous rdv = new RendezVous(
+                            //L'id est fixé à 0 mais sera modifié par le serveur selon le nombre de rdv enregistrés
                             0,
                             titre.getText().toString(),
                             description.getText().toString(),
@@ -65,10 +78,12 @@ public class AddActivity extends AppCompatActivity {
                             heure.getHour(),
                             heure.getMinute()
                     );
+                    //Sérialise le rendez-vous avec Genson
                     String message = new Genson().serialize( rdv );
                     Log.i("Exchange-JSON", "Message == " + message);
 
                     HttpURLConnection urlConnection = null;
+                    //Envoie le rdv sérialisé sur l'url /add qui sera ensuite géré par le serveur
                     try{
                         URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/add");
                         urlConnection = (HttpURLConnection) url.openConnection();
@@ -89,6 +104,7 @@ public class AddActivity extends AppCompatActivity {
                     } finally {
                         if ( urlConnection != null ) urlConnection.disconnect();
                     }
+                    //Termine l'activité
                     activity.finish();
                 }
                 else {
@@ -97,4 +113,9 @@ public class AddActivity extends AppCompatActivity {
             }
         }).start();
     };
+
+    //Termine l'activité
+    private void cancel(){
+        activity.finish();
+    }
 }

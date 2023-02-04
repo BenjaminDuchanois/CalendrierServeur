@@ -37,18 +37,21 @@ public class UpdateActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update);
 
+        //Initialisation des composants graphiques
         activity = UpdateActivity.this;
         titre = (EditText) this.findViewById(R.id.title_text);
         description = (EditText) this.findViewById(R.id.description_text);
         jour = (Spinner) this.findViewById(R.id.day_spinner);
         heure = (TimePicker) this.findViewById(R.id.time_picker);
         boutonValider = (Button) this.findViewById(R.id.confirm_button);
+        //Lance la fonction d'update quand le bouton confirmer est cliqué
         boutonValider.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 update(view);
             }
         });
+        //Permet de mettre le timePicker en format 24h
         heure.setIs24HourView(true);
     }
 
@@ -63,6 +66,7 @@ public class UpdateActivity extends AppCompatActivity {
                 id = Integer.parseInt(intent.getStringExtra("id"));
                 HttpURLConnection urlConnection = null;
                 try {
+                    //Charge le rdv selctioné avec l'url /get/{id}
                     URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/get/" + id);
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("GET");
@@ -71,6 +75,7 @@ public class UpdateActivity extends AppCompatActivity {
                     final RendezVous rendezVous = new Genson().deserialize( scanner.nextLine(), RendezVous.class);
                     Log.i("Exchange-JSON", "Result == " + rendezVous);
 
+                    //Entre les données du rdv dans les champs correspondant
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -93,12 +98,15 @@ public class UpdateActivity extends AppCompatActivity {
         }).start();
     }
 
+    //Fonction de modification
     private void update(View view) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 String nvTitre, nvDesc;
 
+                //Si les données ne sont pas entrées, reprend celles de base dans le hint
+                //Autrement prend en compte les nouvelles données
                 if(titre.getText().toString().equals(""))
                     nvTitre = titre.getHint().toString();
                 else
@@ -108,6 +116,7 @@ public class UpdateActivity extends AppCompatActivity {
                 else
                     nvDesc = description.getText().toString();
 
+                //Crée un nouveau rdv avec les nouvelles données
                 RendezVous rdv = new RendezVous(
                         id,
                         nvTitre,
@@ -116,11 +125,13 @@ public class UpdateActivity extends AppCompatActivity {
                         heure.getHour(),
                         heure.getMinute()
                 );
+                //Sérialise le rdv
                 String message = new Genson().serialize( rdv );
                 Log.i("Exchange-JSON", "Message == " + message);
 
                 HttpURLConnection urlConnection = null;
                 try{
+                    //Envoie le rdv sur l'url /update où le serveur se chargera de remplacer l'ancien par le nouveau
                     URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/update");
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("PUT");

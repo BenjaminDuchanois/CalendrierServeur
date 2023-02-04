@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -78,10 +79,10 @@ public class MainActivity extends AppCompatActivity {
                     LinearLayout principal = (LinearLayout) findViewById(R.id.layoutPrincipal);
                     principal.removeAllViews();
 
-                            //On ajoute le bouton d'ajout de Rdv
-                            Button boutonAjouter = creationBouton();
-                            boutonAjouter.setText(R.string.AddRdvButton);
-                            boutonAjouter.setOnClickListener(view -> add());
+                    //On ajoute le bouton d'ajout de Rdv
+                    Button boutonAjouter = creationBouton();
+                    boutonAjouter.setText(R.string.AddRdvButton);
+                    boutonAjouter.setOnClickListener(view -> add());
 
                     //On définit les différents jours en leur créant un layout chacun
                     LinearLayout lundi = createLayout("Lundi");
@@ -98,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
 
                     //On créer ensuite les layout de chaque rdv
                     for (int i = 0; i<nbRdv; i++) {
-
                         LinearLayout linearLayout = creationListeRdv(i);
 
                         //On ajoute le rdv au jour qui lui correspond
@@ -159,6 +159,9 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 1
         ));
+        Typeface typeface = Typeface.create("Roboto", Typeface.BOLD);
+        textView.setTypeface(typeface);
+        textView.setTextColor(getColor(R.color.black));
         textView.setText(nom);
         textView.setTextSize(30);
 
@@ -177,8 +180,15 @@ public class MainActivity extends AppCompatActivity {
         //On crée un TextView pour son titre
         TextView textView = new TextView(activity);
         textView.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        textView.setText(listeRdv[currentId].getHeure() + "h" + listeRdv[currentId].getMinute() + " : " + listeRdv[currentId].getTitre());
+        Typeface typeface = Typeface.create("Montserrat", Typeface.NORMAL);
+        textView.setTypeface(typeface);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        textView.setTextColor(getColor(R.color.light_black));
+        //Créer un String min, pour qu'il y est tjrs 2 digits aux minutes
+        String min = String.valueOf(listeRdv[currentId].getMinute());
+        if (listeRdv[currentId].getMinute() < 10)
+            min = "0" + min;
+        textView.setText(listeRdv[currentId].getHeure() + "h" + min + " : " + listeRdv[currentId].getTitre());
         //Et un bouton pour la modification
         Button button = creationBouton();
         button.setText(R.string.ModifButton);
@@ -203,6 +213,8 @@ public class MainActivity extends AppCompatActivity {
         //On lui ajoute nos couleurs persos
         button.setBackgroundTintList(getColorStateList(R.color.blue));
         button.setTextColor(getColor(R.color.white));
+        Typeface typeface = Typeface.create("Roboto", Typeface.BOLD);
+        button.setTypeface(typeface);
         return button;
     }
 

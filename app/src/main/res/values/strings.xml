@@ -14,6 +14,14 @@
     <string name="IP">http://192.168.0.28</string>
     <string name="AddRdvButton">  Ajouter un rendez-vous  </string>
     <string name="ModifButton">Modifier</string>
+    <string name="titre">Titre</string>
+    <string name="description">Description</string>
+    <string name="jour">Jour</string>
+    <string name="heure">Heure</string>
+    <string name="buttonConfirmModif">Confirmer les modifications</string>
+    <string name="supprimer">Supprimer</string>
+    <string name="buttonCreateRdv">Créer le rendez-vous</string>
+    <string name="annuler">Annuler</string>
 
 
 </resources>

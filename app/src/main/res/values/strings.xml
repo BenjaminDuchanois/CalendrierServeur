@@ -12,6 +12,8 @@
     </string-array>
 
     <string name="IP">http://192.168.0.28</string>
+    <string name="AddRdvButton">  Ajouter un rendez-vous  </string>
+    <string name="ModifButton">Modifier</string>
 
 
 </resources>

@@ -4,6 +4,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
@@ -30,7 +31,7 @@ import java.util.Scanner;
 public class MainActivity extends AppCompatActivity {
 
     private Activity activity;
-    private RendezVous[] listeRdv = new RendezVous[1000];
+    private final RendezVous[] listeRdv = new RendezVous[1000];
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,105 +42,94 @@ public class MainActivity extends AppCompatActivity {
         this.activity = MainActivity.this;
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onResume() {
         super.onResume();
 
         //---- CONNEXION AU SERVEUR ----
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpURLConnection urlConnection = null;
-                try {
-                    //On récupère le nombre de rdv stockés
-                    URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/getNbRdv");
+        new Thread(() -> {
+            HttpURLConnection urlConnection = null;
+            try {
+                //On récupère le nombre de rdv stockés
+                URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/getNbRdv");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                InputStream in = new BufferedInputStream( urlConnection.getInputStream());
+                Scanner scanner = new Scanner(in);
+                final int nbRdv = new Genson().deserialize( scanner.nextLine(), int.class);
+                Log.i("Exchange-JSON", "Result == " + nbRdv);
+
+                //On charge tous les rdv dans un tableau
+                for (int i = 0; i<nbRdv; i++) {
+                    url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/get/" + i);
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("GET");
-                    InputStream in = new BufferedInputStream( urlConnection.getInputStream());
-                    Scanner scanner = new Scanner(in);
-                    final int nbRdv = new Genson().deserialize( scanner.nextLine(), int.class);
-                    Log.i("Exchange-JSON", "Result == " + nbRdv);
+                    in = new BufferedInputStream(urlConnection.getInputStream());
+                    scanner = new Scanner(in);
+                    final RendezVous rendezVous = new Genson().deserialize(scanner.nextLine(), RendezVous.class);
+                    Log.i("Exchange-JSON", "Result == " + url);
+                    listeRdv[i] = rendezVous;
+                }
 
-                    //On charge tous les rdv dans un tableau
-                    for (int i = 0; i<nbRdv; i++) {
-                        url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/get/" + i);
-                        urlConnection = (HttpURLConnection) url.openConnection();
-                        urlConnection.setRequestMethod("GET");
-                        in = new BufferedInputStream(urlConnection.getInputStream());
-                        scanner = new Scanner(in);
-                        final RendezVous rendezVous = new Genson().deserialize(scanner.nextLine(), RendezVous.class);
-                        Log.i("Exchange-JSON", "Result == " + url);
-                        listeRdv[i] = rendezVous;
-                    }
-
-                    //---- CHARGEMENT DE LA VUE ----
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            //On vide entièrement la vue avec le layout principal
-                            LinearLayout principal = (LinearLayout) findViewById(R.id.layoutPrincipal);
-                            principal.removeAllViews();
+                //---- CHARGEMENT DE LA VUE ----
+                runOnUiThread(() -> {
+                    //On vide entièrement la vue avec le layout principal
+                    LinearLayout principal = (LinearLayout) findViewById(R.id.layoutPrincipal);
+                    principal.removeAllViews();
 
                             //On ajoute le bouton d'ajout de Rdv
                             Button boutonAjouter = creationBouton();
-                            boutonAjouter.setText("  Ajouter un rendez-vous  ");
-                            boutonAjouter.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    add();
-                                }
-                            });
+                            boutonAjouter.setText(R.string.AddRdvButton);
+                            boutonAjouter.setOnClickListener(view -> add());
 
-                            //On définit les différents jours en leur créant un layout chacun
-                            LinearLayout lundi = createLayout("Lundi");
-                            LinearLayout mardi = createLayout("Mardi");
-                            LinearLayout mercredi = createLayout("Mercredi");
-                            LinearLayout jeudi = createLayout("Jeudi");
-                            LinearLayout vendredi = createLayout("Vendredi");
-                            LinearLayout samedi = createLayout("Samedi");
-                            LinearLayout dimanche = createLayout("Dimanche");
+                    //On définit les différents jours en leur créant un layout chacun
+                    LinearLayout lundi = createLayout("Lundi");
+                    LinearLayout mardi = createLayout("Mardi");
+                    LinearLayout mercredi = createLayout("Mercredi");
+                    LinearLayout jeudi = createLayout("Jeudi");
+                    LinearLayout vendredi = createLayout("Vendredi");
+                    LinearLayout samedi = createLayout("Samedi");
+                    LinearLayout dimanche = createLayout("Dimanche");
 
-                            //On ajoute le bouton et les jours au layout principal
-                            principal.addView(boutonAjouter);
-                            principal.addView(lundi);principal.addView(mardi);principal.addView(mercredi);principal.addView(jeudi);principal.addView(vendredi);principal.addView(samedi);principal.addView(dimanche);
+                    //On ajoute le bouton et les jours au layout principal
+                    principal.addView(boutonAjouter);
+                    principal.addView(lundi);principal.addView(mardi);principal.addView(mercredi);principal.addView(jeudi);principal.addView(vendredi);principal.addView(samedi);principal.addView(dimanche);
 
-                            //On créer ensuite les layout de chaque rdv
-                            for (int i = 0; i<nbRdv; i++) {
-                                final int currentId = i;
+                    //On créer ensuite les layout de chaque rdv
+                    for (int i = 0; i<nbRdv; i++) {
 
-                                LinearLayout linearLayout = creationListeRdv(currentId);
+                        LinearLayout linearLayout = creationListeRdv(i);
 
-                                //On ajoute le rdv au jour qui lui correspond
-                                switch (listeRdv[i].getJour()){
-                                    case 0: lundi.addView(linearLayout);
-                                            break;
-                                    case 1: mardi.addView(linearLayout);
-                                            break;
-                                    case 2: mercredi.addView(linearLayout);
-                                            break;
-                                    case 3: jeudi.addView(linearLayout);
-                                            break;
-                                    case 4: vendredi.addView(linearLayout);
-                                            break;
-                                    case 5: samedi.addView(linearLayout);
-                                            break;
-                                    case 6: dimanche.addView(linearLayout);
-                                            break;
-                                    default:
-                                            break;
-                                }
-                            }
+                        //On ajoute le rdv au jour qui lui correspond
+                        switch (listeRdv[i].getJour()){
+                            case 0: lundi.addView(linearLayout);
+                                    break;
+                            case 1: mardi.addView(linearLayout);
+                                    break;
+                            case 2: mercredi.addView(linearLayout);
+                                    break;
+                            case 3: jeudi.addView(linearLayout);
+                                    break;
+                            case 4: vendredi.addView(linearLayout);
+                                    break;
+                            case 5: samedi.addView(linearLayout);
+                                    break;
+                            case 6: dimanche.addView(linearLayout);
+                                    break;
+                            default:
+                                    break;
                         }
-                    });
+                    }
+                });
 
 
-                    in.close();
+                in.close();
 
-                } catch (Exception e) {
-                    Log.e( "Exchange-JSON", "Cannot found http server", e);
-                } finally {
-                    if ( urlConnection != null) urlConnection.disconnect();
-                }
+            } catch (Exception e) {
+                Log.e( "Exchange-JSON", "Cannot found http server", e);
+            } finally {
+                if ( urlConnection != null) urlConnection.disconnect();
             }
         }).start();
     }
@@ -178,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Crée les rendez-vous
+    @SuppressLint("SetTextI18n")
     private LinearLayout creationListeRdv(int currentId){
         //On crée pour chaque rdv un Layout
         LinearLayout linearLayout = new LinearLayout(activity);
@@ -190,14 +181,9 @@ public class MainActivity extends AppCompatActivity {
         textView.setText(listeRdv[currentId].getHeure() + "h" + listeRdv[currentId].getMinute() + " : " + listeRdv[currentId].getTitre());
         //Et un bouton pour la modification
         Button button = creationBouton();
-        button.setText("Modifier");
+        button.setText(R.string.ModifButton);
         //On assigne l'update au bouton concerné
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                update(listeRdv[currentId].getIdRdv());
-            }
-        });
+        button.setOnClickListener(view -> update(listeRdv[currentId].getIdRdv()));
         //On ajoute le tout au layout
         linearLayout.addView(textView);
         linearLayout.addView(button);
@@ -214,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
-        //On lui ajoute nos couleurs perso
+        //On lui ajoute nos couleurs persos
         button.setBackgroundTintList(getColorStateList(R.color.blue));
         button.setTextColor(getColor(R.color.white));
         return button;

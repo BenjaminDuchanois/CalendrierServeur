@@ -19,6 +19,7 @@ import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
@@ -30,6 +31,7 @@ public class UpdateActivity extends AppCompatActivity {
     Spinner jour;
     TimePicker heure;
     Button boutonValider;
+    Button boutonSuppr;
     int id;
 
     @Override
@@ -44,8 +46,10 @@ public class UpdateActivity extends AppCompatActivity {
         jour = (Spinner) this.findViewById(R.id.day_spinner);
         heure = (TimePicker) this.findViewById(R.id.time_picker);
         boutonValider = (Button) this.findViewById(R.id.confirm_button);
+        boutonSuppr = (Button) this.findViewById(R.id.suppr_button);
         //Lance la fonction d'update quand le bouton confirmer est cliqué
         boutonValider.setOnClickListener(this::update);
+        boutonSuppr.setOnClickListener(this::suppr);
         //Permet de mettre le timePicker au format 24h
         heure.setIs24HourView(true);
     }
@@ -112,34 +116,62 @@ public class UpdateActivity extends AppCompatActivity {
                     heure.getHour(),
                     heure.getMinute()
             );
-            //Sérialise le rdv
-            String message = new Genson().serialize( rdv );
-            Log.i("Exchange-JSON", "Message == " + message);
 
-            HttpURLConnection urlConnection = null;
-            try{
-                //Envoie le rdv sur l'url /update où le serveur se chargera de remplacer l'ancien par le nouveau
-                URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/update");
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("PUT");
-                urlConnection.setDoOutput(true);
-                urlConnection.setRequestProperty("Content-Type", "application/json");
-
-                OutputStream out = new BufferedOutputStream( urlConnection.getOutputStream() );
-                out.write( message.getBytes());
-                out.close();
-
-                InputStream in = new BufferedInputStream( urlConnection.getInputStream());
-                Scanner scanner = new Scanner(in);
-                Log.i("Exchange-JSON", "Result == " + scanner.nextLine());
-                in.close();
-            } catch ( Exception e ) {
-                Log.e("Exchange-JSON", "Cannot found http server", e);
-            } finally {
-                if ( urlConnection != null ) urlConnection.disconnect();
+            URL url = null;
+            try {
+                url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/update");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
+            appelURL(rdv, url);
+
         }).start();
 
         this.finish();
+    }
+
+    private void suppr(View view){
+        new Thread(() -> {
+            RendezVous rdv = new RendezVous();
+            rdv.setIdRdv(id);
+
+            URL url = null;
+            try {
+                url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/del");
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            appelURL(rdv, url);
+        }).start();
+
+        this.finish();
+    }
+
+    private void appelURL(RendezVous rdv, URL url){
+        //Sérialise le rdv
+        String message = new Genson().serialize( rdv );
+        Log.i("Exchange-JSON", "Message == " + message);
+
+        HttpURLConnection urlConnection = null;
+        try{
+            //Envoie le rdv sur l'url /update où le serveur se chargera de remplacer l'ancien par le nouveau
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("PUT");
+            urlConnection.setDoOutput(true);
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+
+            OutputStream out = new BufferedOutputStream( urlConnection.getOutputStream() );
+            out.write( message.getBytes());
+            out.close();
+
+            InputStream in = new BufferedInputStream( urlConnection.getInputStream());
+            Scanner scanner = new Scanner(in);
+            Log.i("Exchange-JSON", "Result == " + scanner.nextLine());
+            in.close();
+        } catch ( Exception e ) {
+            Log.e("Exchange-JSON", "Cannot found http server", e);
+        } finally {
+            if ( urlConnection != null ) urlConnection.disconnect();
+        }
     }
 }

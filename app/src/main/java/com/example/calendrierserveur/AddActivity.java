@@ -1,5 +1,16 @@
 package com.example.calendrierserveur;
 
+/*
+    PROGRAMME pour le PROJET d'ASI
+    DUCHANOIS Benjamin
+    JORGE William
+    Master 1 Informatique
+
+    Pour accèder au serveur, penser à changer l'URL
+    res/values/strings.xml
+    Changer l'IP, le Port et le Path selon le serveur si besoin
+ */
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
@@ -75,7 +86,7 @@ public class AddActivity extends AppCompatActivity {
                 HttpURLConnection urlConnection = null;
                 //Envoie le rdv sérialisé sur l'url /add qui sera ensuite géré par le serveur
                 try{
-                    URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/add");
+                    URL url = new URL(getString(R.string.IP)+getString(R.string.Port)+getString(R.string.Path)+ getString(R.string.serverAjout));
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("PUT");
                     urlConnection.setDoOutput(true);

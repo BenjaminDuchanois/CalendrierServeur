@@ -11,7 +11,19 @@
         <item>Dimanche</item>
     </string-array>
 
+    <!-- Paramètrage pour l'accès au serveur -->
     <string name="IP">http://192.168.0.28</string>
+    <string name="Port">:8081/</string>
+    <string name="Path">CalendrierServeur/rest/rdv/</string>
+
+    <!-- Fonctions du serveur -->
+    <string name="serverGet">get/</string>
+    <string name="serverGetNombreDeRendezVous">getNbRdv</string>
+    <string name="serverAjout">add</string>
+    <string name="serverModification">update</string>
+    <string name="serverSuppression">del</string>
+
+    <!-- Autres ressources -->
     <string name="AddRdvButton">  Ajouter un rendez-vous  </string>
     <string name="ModifButton">Modifier</string>
     <string name="titre">Titre</string>

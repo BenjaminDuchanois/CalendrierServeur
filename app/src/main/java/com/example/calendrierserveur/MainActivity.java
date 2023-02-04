@@ -1,5 +1,16 @@
 package com.example.calendrierserveur;
 
+/*
+    PROGRAMME pour le PROJET d'ASI
+    DUCHANOIS Benjamin
+    JORGE William
+    Master 1 Informatique
+
+    Pour accèder au serveur, penser à changer l'URL
+    res/values/strings.xml
+    Changer l'IP, le Port et le Path selon le serveur si besoin
+ */
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
             HttpURLConnection urlConnection = null;
             try {
                 //On récupère le nombre de rdv stockés
-                URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/getNbRdv");
+                URL url = new URL(getString(R.string.IP)+getString(R.string.Port)+getString(R.string.Path)+ getString(R.string.serverGetNombreDeRendezVous));
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 InputStream in = new BufferedInputStream( urlConnection.getInputStream());
@@ -63,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //On charge tous les rdv dans un tableau
                 for (int i = 0; i<nbRdv; i++) {
-                    url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/get/" + i);
+                    url = new URL(getString(R.string.IP)+getString(R.string.Port)+getString(R.string.Path)+ getString(R.string.serverGet) + i);
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("GET");
                     in = new BufferedInputStream(urlConnection.getInputStream());

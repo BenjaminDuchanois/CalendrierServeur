@@ -1,5 +1,16 @@
 package com.example.calendrierserveur;
 
+/*
+    PROGRAMME pour le PROJET d'ASI
+    DUCHANOIS Benjamin
+    JORGE William
+    Master 1 Informatique
+
+    Pour accèder au serveur, penser à changer l'URL
+    res/values/strings.xml
+    Changer l'IP, le Port et le Path selon le serveur si besoin
+ */
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
@@ -64,7 +75,7 @@ public class UpdateActivity extends AppCompatActivity {
             HttpURLConnection urlConnection = null;
             try {
                 //Charge le rdv selctioné avec l'url /get/{id}
-                URL url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/get/" + id);
+                URL url = new URL(getString(R.string.IP)+getString(R.string.Port)+getString(R.string.Path)+ getString(R.string.serverGet) + id);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 InputStream in = new BufferedInputStream( urlConnection.getInputStream());
@@ -119,7 +130,7 @@ public class UpdateActivity extends AppCompatActivity {
 
             URL url = null;
             try {
-                url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/update");
+                url = new URL(getString(R.string.IP)+getString(R.string.Port)+getString(R.string.Path)+ getString(R.string.serverModification));
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -137,7 +148,7 @@ public class UpdateActivity extends AppCompatActivity {
 
             URL url = null;
             try {
-                url = new URL(getString(R.string.IP)+":8081/CalendrierServeur/rest/rdv/del");
+                url = new URL(getString(R.string.IP)+getString(R.string.Port)+getString(R.string.Path)+ getString(R.string.serverSuppression));
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }

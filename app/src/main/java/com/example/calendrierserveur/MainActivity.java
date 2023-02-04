@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         Button button = creationBouton();
         button.setText(R.string.ModifButton);
         //On assigne l'update au bouton concerné
-        button.setOnClickListener(view -> update(listeRdv[currentId].getIdRdv()));
+        button.setOnClickListener(view -> update(currentId));
         //On ajoute le tout au layout
         linearLayout.addView(textView);
         linearLayout.addView(button);

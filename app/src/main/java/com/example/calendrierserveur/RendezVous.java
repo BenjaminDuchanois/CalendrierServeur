@@ -1,5 +1,7 @@
 package com.example.calendrierserveur;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,6 +22,7 @@ public class RendezVous {
         this.setMinute(0);
     }
 
+    //Crée les objets RendezVous
     public RendezVous(int idRdv, String titre, String description, int jour, int heure, int minute) {
         this.setIdRdv(idRdv);
         this.setTitre(titre);
@@ -77,6 +80,7 @@ public class RendezVous {
         this.minute = minute;
     }
 
+    @NonNull
     @Override
     public String toString() {
         JSONObject jsonObject = new JSONObject();

@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
                     final RendezVous rendezVous = new Genson().deserialize(scanner.nextLine(), RendezVous.class);
                     Log.i("Exchange-JSON", "Result == " + url);
                     listeRdv.add(rendezVous);
+                    listeRdv.get(i).setIdRdv(i);
                 }
 
                 //On trie ensuite la liste par l'heure pour que les rdv s'affiche par ordre chronologique
@@ -223,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
         Button button = creationBouton();
         button.setText(R.string.ModifButton);
         //On assigne l'update au bouton concerné
-        button.setOnClickListener(view -> update(currentId));
+        button.setOnClickListener(view -> update(listeRdv.get(currentId).getIdRdv()));
         //On ajoute le tout au layout
         linearLayout.addView(textView);
         linearLayout.addView(button);

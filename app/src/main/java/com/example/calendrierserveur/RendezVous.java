@@ -5,7 +5,9 @@ import androidx.annotation.NonNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RendezVous {
+import java.io.Serializable;
+
+public class RendezVous implements Serializable {
     private int idRdv;
     private String titre;
     private String description;

@@ -2,6 +2,7 @@ package com.example.calendrierserveur;
 
 /*
     PROGRAMME pour le PROJET d'ASI
+    COTE CLIENT
     DUCHANOIS Benjamin
     JORGE William
     Master 1 Informatique

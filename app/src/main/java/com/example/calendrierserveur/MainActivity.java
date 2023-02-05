@@ -11,39 +11,43 @@ package com.example.calendrierserveur;
     Changer l'IP, le Port et le Path selon le serveur si besoin
  */
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+//Gestion des activités
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
+//Elements graphiques
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+//Serialisation
 import com.owlike.genson.Genson;
 
+//Permet la connexion au serveur
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
+//Permet la gestion et le tri de listes
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private Activity activity;
-    private final RendezVous[] listeRdv = new RendezVous[1000];
+    private final ArrayList <RendezVous> listeRdv = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        //On reinitialise la liste de Rdv au cas où ils seraient déjà chargés
+        listeRdv.clear();
 
         //---- CONNEXION AU SERVEUR ----
         new Thread(() -> {
@@ -72,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                 final int nbRdv = new Genson().deserialize( scanner.nextLine(), int.class);
                 Log.i("Exchange-JSON", "Result == " + nbRdv);
 
-                //On charge tous les rdv dans un tableau
+                //On charge tous les rdv dans une liste
                 for (int i = 0; i<nbRdv; i++) {
                     url = new URL(getString(R.string.IP)+getString(R.string.Port)+getString(R.string.Path)+ getString(R.string.serverGet) + i);
                     urlConnection = (HttpURLConnection) url.openConnection();
@@ -81,8 +87,21 @@ public class MainActivity extends AppCompatActivity {
                     scanner = new Scanner(in);
                     final RendezVous rendezVous = new Genson().deserialize(scanner.nextLine(), RendezVous.class);
                     Log.i("Exchange-JSON", "Result == " + url);
-                    listeRdv[i] = rendezVous;
+                    listeRdv.add(rendezVous);
                 }
+
+                //On trie ensuite la liste par l'heure pour que les rdv s'affiche par ordre chronologique
+                Collections.sort(listeRdv, (rdv1, rdv2) -> {
+                    int heure1 = rdv1.getHeure();
+                    int heure2 = rdv2.getHeure();
+                    if (heure1 != heure2) {
+                        return Integer.compare(heure1, heure2);
+                    } else {
+                        int minute1 = rdv1.getMinute();
+                        int minute2 = rdv2.getMinute();
+                        return Integer.compare(minute1, minute2);
+                    }
+                });
 
                 //---- CHARGEMENT DE LA VUE ----
                 runOnUiThread(() -> {
@@ -113,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                         LinearLayout linearLayout = creationListeRdv(i);
 
                         //On ajoute le rdv au jour qui lui correspond
-                        switch (listeRdv[i].getJour()){
+                        switch (listeRdv.get(i).getJour()){
                             case 0: lundi.addView(linearLayout);
                                     break;
                             case 1: mardi.addView(linearLayout);
@@ -196,10 +215,10 @@ public class MainActivity extends AppCompatActivity {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         textView.setTextColor(getColor(R.color.light_black));
         //Créer un String min, pour qu'il y est tjrs 2 digits aux minutes
-        String min = String.valueOf(listeRdv[currentId].getMinute());
-        if (listeRdv[currentId].getMinute() < 10)
+        String min = String.valueOf(listeRdv.get(currentId).getMinute());
+        if (listeRdv.get(currentId).getMinute() < 10)
             min = "0" + min;
-        textView.setText(listeRdv[currentId].getHeure() + "h" + min + " : " + listeRdv[currentId].getTitre());
+        textView.setText(listeRdv.get(currentId).getHeure() + "h" + min + " : " + listeRdv.get(currentId).getTitre());
         //Et un bouton pour la modification
         Button button = creationBouton();
         button.setText(R.string.ModifButton);
